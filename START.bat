@@ -52,13 +52,13 @@ timeout /t 30 /nobreak
 
 echo.
 echo Opening app in browser...
-start http://localhost:3000
+start http://akash-automobile:3000
 
 echo.
 echo  ============================================
 echo   App is running!
-echo   Frontend : http://localhost:3000
-echo   Backend  : http://localhost:8000
+echo   Frontend : http://akash-automobile:3000
+echo   Backend  : http://akash-automobile:8000
 echo.
 echo   Login: sumitkalaskar / sunilkalaskar
 echo.
