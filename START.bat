@@ -1,5 +1,5 @@
 @echo off
-title Akash Automobile - Starting...
+title Akash Automobile
 cd /d "%~dp0"
 
 echo.
@@ -8,53 +8,36 @@ echo   AKASH AUTOMOBILE - Stock Management App
 echo  ============================================
 echo.
 
-:: Check if Docker is available
-docker --version >nul 2>&1
+echo Checking Docker...
+docker --version
 if errorlevel 1 (
-    echo [ERROR] Docker is not installed or not in PATH.
     echo.
-    echo Please install Docker Desktop from:
+    echo [ERROR] Docker not found. Please install Docker Desktop.
     echo https://www.docker.com/products/docker-desktop/
     echo.
     pause
     exit /b 1
 )
 
-echo Docker found:
-docker --version
 echo.
-
-:: Check if Docker daemon is running
+echo Checking Docker engine is running...
 docker info >nul 2>&1
 if errorlevel 1 (
-    echo [INFO] Docker Desktop is not running. Attempting to start it...
-    start "" "C:\Program Files\Docker\Docker\Docker Desktop.exe"
     echo.
-    echo Waiting for Docker to start (this may take 30-60 seconds)...
-    :WAIT_DOCKER
-    timeout /t 5 /nobreak >nul
-    docker info >nul 2>&1
-    if errorlevel 1 goto WAIT_DOCKER
-    echo Docker is ready!
+    echo [ERROR] Docker Desktop is not running.
+    echo Please start Docker Desktop, wait for it to fully load, then run START.bat again.
     echo.
+    pause
+    exit /b 1
 )
 
-echo Docker is running.
+echo Docker engine is ready.
+echo.
+echo Starting all services...
+echo (First run takes 5-10 minutes to download images)
 echo.
 
-echo [1/3] Building and starting all services...
-echo       (First run may take 5-10 minutes to download images)
-echo.
-
-:: Try new-style "docker compose" first, fall back to "docker-compose"
-docker compose version >nul 2>&1
-if errorlevel 1 (
-    echo Using docker-compose...
-    docker-compose up --build -d
-) else (
-    echo Using docker compose...
-    docker compose up --build -d
-)
+docker compose up --build -d
 
 if errorlevel 1 (
     echo.
@@ -64,24 +47,22 @@ if errorlevel 1 (
 )
 
 echo.
-echo [2/3] Waiting for services to be ready (30 seconds)...
-timeout /t 30 /nobreak >nul
+echo Waiting 30 seconds for services to initialize...
+timeout /t 30 /nobreak
 
-echo [3/3] Opening app in browser...
+echo.
+echo Opening app in browser...
 start http://localhost:3000
 
 echo.
 echo  ============================================
 echo   App is running!
-echo.
 echo   Frontend : http://localhost:3000
 echo   Backend  : http://localhost:8000
 echo.
-echo   Default login:
-echo     Username : sumitkalaskar
-echo     Password : sunilkalaskar
+echo   Login: sumitkalaskar / sunilkalaskar
 echo.
-echo   To STOP the app, run STOP.bat
+echo   Run STOP.bat to stop the app.
 echo  ============================================
 echo.
 pause
