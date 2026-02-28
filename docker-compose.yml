@@ -1,0 +1,61 @@
+version: "3.9"
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: akash_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: sujeet8185
+      MYSQL_DATABASE: akash_automobile
+      MYSQL_USER: akash_user
+      MYSQL_PASSWORD: sujeet8185
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: akash_backend
+    restart: always
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py create_admin &&
+             python manage.py runserver 0.0.0.0:8000"
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_HOST=db
+      - DB_NAME=akash_automobile
+      - DB_USER=akash_user
+      - DB_PASSWORD=sujeet8185
+      - DB_PORT=3306
+      - SECRET_KEY=akash-automobile-secret-key-2024-very-secure
+      - DEBUG=True
+      - ALLOWED_HOSTS=*
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: akash_frontend
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_URL=http://backend:8000
+    depends_on:
+      - backend
+
+volumes:
+  mysql_data:
