@@ -1,6 +1,7 @@
 Django==5.0.6
 djangorestframework==3.15.2
 PyMySQL
+cryptography
 django-cors-headers==4.4.0
 
 Pillow>=11.0
