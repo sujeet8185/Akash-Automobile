@@ -20,6 +20,10 @@ if errorlevel 1 (
     exit /b 1
 )
 
+echo Docker found:
+docker --version
+echo.
+
 :: Check if Docker daemon is running
 docker info >nul 2>&1
 if errorlevel 1 (
@@ -35,31 +39,33 @@ if errorlevel 1 (
     echo.
 )
 
+echo Docker is running.
+echo.
+
 echo [1/3] Building and starting all services...
 echo       (First run may take 5-10 minutes to download images)
 echo.
 
-docker-compose up --build -d
+:: Try new-style "docker compose" first, fall back to "docker-compose"
+docker compose version >nul 2>&1
+if errorlevel 1 (
+    echo Using docker-compose...
+    docker-compose up --build -d
+) else (
+    echo Using docker compose...
+    docker compose up --build -d
+)
 
 if errorlevel 1 (
     echo.
-    echo [ERROR] Failed to start services. Check the output above.
+    echo [ERROR] Failed to start services. See error above.
     pause
     exit /b 1
 )
 
 echo.
-echo [2/3] Waiting for services to be ready...
-timeout /t 10 /nobreak >nul
-
-:: Wait for backend to be healthy
-echo Waiting for backend...
-:WAIT_BACKEND
-docker exec akash_backend python manage.py check >nul 2>&1
-if errorlevel 1 (
-    timeout /t 3 /nobreak >nul
-    goto WAIT_BACKEND
-)
+echo [2/3] Waiting for services to be ready (30 seconds)...
+timeout /t 30 /nobreak >nul
 
 echo [3/3] Opening app in browser...
 start http://localhost:3000

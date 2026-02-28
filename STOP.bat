@@ -8,7 +8,12 @@ echo   AKASH AUTOMOBILE - Stopping Services
 echo  ============================================
 echo.
 
-docker-compose down
+docker compose version >nul 2>&1
+if errorlevel 1 (
+    docker-compose down
+) else (
+    docker compose down
+)
 
 if errorlevel 1 (
     echo [ERROR] Failed to stop services.
