@@ -115,9 +115,9 @@ Open: http://localhost:3000
 Use MySQL Workbench or DBeaver (free) with these connection settings:
 
 Field	Value
-Host	127.0.0.1
-Port	3306
-Username	akash_user
-Password	sujeet*1**
-Database	akash_automobile
+- Host —	127.0.0.1
+- Port —	3306
+- Username —	akash_user
+- Password —	sujeet*1**
+- Database —	akash_automobile
 
