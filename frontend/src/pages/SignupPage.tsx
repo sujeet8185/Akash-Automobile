@@ -36,7 +36,7 @@ export default function SignupPage() {
     setLoading(true)
     setError("")
     try {
-      const res = await api.post("/auth/register/", {
+      const res = await api.post("/api/auth/register/", {
         username: data.username,
         password: data.password,
         email: data.email || undefined,
