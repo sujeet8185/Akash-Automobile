@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: akash-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: akash-backend
+  template:
+    metadata:
+      labels:
+        app: akash-backend
+    spec:
+      containers:
+      - name: akash-backend
+        image: 666177269940.dkr.ecr.ap-south-1.amazonaws.com/akash-backend:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: DJANGO_SETTINGS_MODULE
+          value: core.settings
+        # Add other environment variables as needed
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: akash-backend-service
+spec:
+  type: ClusterIP
+  selector:
+    app: akash-backend
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000

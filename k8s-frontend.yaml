@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: akash-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: akash-frontend
+  template:
+    metadata:
+      labels:
+        app: akash-frontend
+    spec:
+      containers:
+      - name: akash-frontend
+        image: 666177269940.dkr.ecr.ap-south-1.amazonaws.com/akash-frontend:latest
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: akash-frontend-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: akash-frontend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
