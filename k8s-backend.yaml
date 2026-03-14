@@ -34,7 +34,7 @@ kind: Service
 metadata:
   name: akash-backend-service
 spec:
-  type: ClusterIP
+  type: LoadBalancer
   selector:
     app: akash-backend
   ports:
