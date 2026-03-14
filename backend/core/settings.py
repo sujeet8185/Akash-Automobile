@@ -9,7 +9,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY", "akash-automobile-secret-key-2024-very
 
 DEBUG = os.environ.get("DEBUG", "True") == "True"
 
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1,0.0.0.0").split(",")
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1,0.0.0.0,a9be4c70a67844cdb9a2aa44a7a1d367-592935259.ap-south-1.elb.amazonaws.com").split(",")
 
 INSTALLED_APPS = [
     "django.contrib.admin",
