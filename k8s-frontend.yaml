@@ -17,6 +17,13 @@ spec:
         image: 666177269940.dkr.ecr.ap-south-1.amazonaws.com/akash-frontend:latest
         ports:
         - containerPort: 80
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
 ---
 apiVersion: v1
 kind: Service
