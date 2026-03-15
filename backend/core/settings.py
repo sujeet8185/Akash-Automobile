@@ -61,10 +61,10 @@ WSGI_APPLICATION = "core.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
-        "NAME": os.environ.get("DB_NAME", "akash_automobile"),
-        "USER": os.environ.get("DB_USER", "root"),
+        "NAME": os.environ.get("DB_NAME", "akashdb"),
+        "USER": os.environ.get("DB_USER", "akashuser"),
         "PASSWORD": os.environ.get("DB_PASSWORD", "sujeet8185"),
-        "HOST": os.environ.get("DB_HOST", "127.0.0.1"),
+        "HOST": os.environ.get("DB_HOST", "mysql"),
         "PORT": os.environ.get("DB_PORT", "3306"),
         "OPTIONS": {
             "charset": "utf8mb4",
