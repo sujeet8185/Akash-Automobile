@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { Link, useSearchParams } from "react-router-dom"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { Plus, Search, Pencil, Trash2, ArrowUpDown, Package, Filter, ChevronLeft, ChevronRight } from "lucide-react"
+import { Plus, Search, Pencil, Trash2, ArrowUpDown, ArrowUp, ArrowDown, Package, Filter, ChevronLeft, ChevronRight } from "lucide-react"
 import api from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -26,12 +26,33 @@ export default function ItemsPage() {
   const queryClient = useQueryClient()
 
   const page = parseInt(searchParams.get("page") || "1", 10)
+  const ordering = searchParams.get("ordering") || ""
 
   const filters: Record<string, string | number> = { page }
   if (search) filters.search = search
   if (searchParams.get("low_stock")) filters.low_stock = "true"
   if (searchParams.get("company")) filters.company = searchParams.get("company")!
   if (searchParams.get("is_active")) filters.is_active = searchParams.get("is_active")!
+  if (ordering) filters.ordering = ordering
+
+  const toggleSort = (field: string) => {
+    const p = new URLSearchParams(searchParams)
+    p.delete("page")
+    if (ordering === field) {
+      p.set("ordering", `-${field}`)
+    } else if (ordering === `-${field}`) {
+      p.delete("ordering")
+    } else {
+      p.set("ordering", field)
+    }
+    setSearchParams(p)
+  }
+
+  const sortIcon = (field: string) => {
+    if (ordering === field) return <ArrowUp className="w-3 h-3" />
+    if (ordering === `-${field}`) return <ArrowDown className="w-3 h-3" />
+    return <ArrowUpDown className="w-3 h-3 text-gray-400" />
+  }
 
   const { data, isLoading } = useQuery({
     queryKey: ["items", filters],
@@ -151,13 +172,23 @@ export default function ItemsPage() {
             <Table>
               <TableHeader>
                 <TableRow className="bg-gray-50">
-                  <TableHead>Item Name</TableHead>
+                  <TableHead>
+                    <button
+                      className="flex items-center gap-1 font-medium hover:text-[#1b4965] transition-colors"
+                      onClick={() => toggleSort("name")}
+                    >
+                      Item Name {sortIcon("name")}
+                    </button>
+                  </TableHead>
                   <TableHead>Part No.</TableHead>
                   <TableHead>Company</TableHead>
                   <TableHead>
-                    <span className="flex items-center gap-1">
-                      Quantity <ArrowUpDown className="w-3 h-3" />
-                    </span>
+                    <button
+                      className="flex items-center gap-1 font-medium hover:text-[#1b4965] transition-colors"
+                      onClick={() => toggleSort("quantity")}
+                    >
+                      Quantity {sortIcon("quantity")}
+                    </button>
                   </TableHead>
                   <TableHead>Unit</TableHead>
                   <TableHead>Purchase Price</TableHead>
