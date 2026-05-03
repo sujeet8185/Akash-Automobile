@@ -1,6 +1,7 @@
 from rest_framework import viewsets, filters, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Sum, Count, Q, F
 from .models import Item, StockTransaction
@@ -9,6 +10,12 @@ from .serializers import (
     StockTransactionSerializer, AddStockSerializer, RemoveStockSerializer,
 )
 import django_filters
+
+
+class ItemPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = "page_size"
+    max_page_size = 100
 
 
 class ItemFilter(django_filters.FilterSet):
@@ -30,6 +37,7 @@ class ItemFilter(django_filters.FilterSet):
 class ItemViewSet(viewsets.ModelViewSet):
     queryset = Item.objects.select_related("company").all()
     serializer_class = ItemSerializer
+    pagination_class = ItemPagination
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_class = ItemFilter
     search_fields = ["name", "part_number", "description", "company__name"]

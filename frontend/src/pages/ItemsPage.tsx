@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { Link, useSearchParams } from "react-router-dom"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { Plus, Search, Pencil, Trash2, ArrowUpDown, Package, Filter } from "lucide-react"
+import { Plus, Search, Pencil, Trash2, ArrowUpDown, Package, Filter, ChevronLeft, ChevronRight } from "lucide-react"
 import api from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -25,7 +25,9 @@ export default function ItemsPage() {
   const [deleteId, setDeleteId] = useState<number | null>(null)
   const queryClient = useQueryClient()
 
-  const filters: Record<string, string> = {}
+  const page = parseInt(searchParams.get("page") || "1", 10)
+
+  const filters: Record<string, string | number> = { page }
   if (search) filters.search = search
   if (searchParams.get("low_stock")) filters.low_stock = "true"
   if (searchParams.get("company")) filters.company = searchParams.get("company")!
@@ -55,6 +57,14 @@ export default function ItemsPage() {
   })
 
   const items = data?.results ?? data ?? []
+  const totalCount: number = data?.count ?? items.length
+  const totalPages = Math.ceil(totalCount / 10)
+
+  const goToPage = (p: number) => {
+    const params = new URLSearchParams(searchParams)
+    p === 1 ? params.delete("page") : params.set("page", String(p))
+    setSearchParams(params)
+  }
 
   return (
     <div className="space-y-4">
@@ -71,6 +81,7 @@ export default function ItemsPage() {
                 setSearch(e.target.value)
                 const p = new URLSearchParams(searchParams)
                 e.target.value ? p.set("search", e.target.value) : p.delete("search")
+                p.delete("page")
                 setSearchParams(p)
               }}
             />
@@ -80,6 +91,7 @@ export default function ItemsPage() {
             onValueChange={(v) => {
               const p = new URLSearchParams(searchParams)
               v === "all" ? p.delete("company") : p.set("company", v)
+              p.delete("page")
               setSearchParams(p)
             }}
           >
@@ -99,6 +111,7 @@ export default function ItemsPage() {
             onValueChange={(v) => {
               const p = new URLSearchParams(searchParams)
               v === "true" ? p.set("low_stock", "true") : p.delete("low_stock")
+              p.delete("page")
               setSearchParams(p)
             }}
           >
@@ -208,6 +221,46 @@ export default function ItemsPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between px-1">
+          <p className="text-sm text-gray-500">
+            Showing {(page - 1) * 10 + 1}–{Math.min(page * 10, totalCount)} of {totalCount} items
+          </p>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 w-8 p-0"
+              onClick={() => goToPage(page - 1)}
+              disabled={page <= 1}
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </Button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+              <Button
+                key={p}
+                variant={p === page ? "brand" : "outline"}
+                size="sm"
+                className="h-8 w-8 p-0"
+                onClick={() => goToPage(p)}
+              >
+                {p}
+              </Button>
+            ))}
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 w-8 p-0"
+              onClick={() => goToPage(page + 1)}
+              disabled={page >= totalPages}
+            >
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Delete confirmation dialog */}
       <Dialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>

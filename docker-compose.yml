@@ -10,8 +10,6 @@ services:
       MYSQL_DATABASE: akash_automobile
       MYSQL_USER: akash_user
       MYSQL_PASSWORD: sujeet8185
-    ports:
-      - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:
