@@ -4,12 +4,50 @@ from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Sum, Count, Q, F
+from django.db.models.expressions import RawSQL
 from .models import Item, StockTransaction
 from .serializers import (
     ItemSerializer, ItemDetailSerializer,
     StockTransactionSerializer, AddStockSerializer, RemoveStockSerializer,
 )
 import django_filters
+
+
+class NaturalOrderingFilter(filters.OrderingFilter):
+    """Ordering filter that sorts the `name` field using natural (numeric-aware) order.
+
+    MySQL lexicographic sort puts B-100 before B-29. This splits the trailing
+    numeric suffix and sorts it as an unsigned integer so B-29 < B-100.
+    """
+
+    def filter_queryset(self, request, queryset, view):
+        ordering = self.get_ordering(request, queryset, view)
+        if not ordering:
+            return queryset
+
+        resolved = []
+        needs_natural = any(o.lstrip("-") == "name" for o in ordering)
+
+        if needs_natural:
+            queryset = queryset.annotate(
+                _name_prefix=RawSQL(
+                    "REGEXP_REPLACE(`items`.`name`, '-[0-9]+$', '')", []
+                ),
+                _name_number=RawSQL(
+                    "CAST(COALESCE(NULLIF(REGEXP_SUBSTR(`items`.`name`, '[0-9]+$'), ''), '0') AS UNSIGNED)", []
+                ),
+            )
+
+        for field in ordering:
+            descending = field.startswith("-")
+            base = field.lstrip("-")
+            prefix = "-" if descending else ""
+            if base == "name":
+                resolved += [f"{prefix}_name_prefix", f"{prefix}_name_number"]
+            else:
+                resolved.append(field)
+
+        return queryset.order_by(*resolved)
 
 
 class ItemPagination(PageNumberPagination):
@@ -38,7 +76,7 @@ class ItemViewSet(viewsets.ModelViewSet):
     queryset = Item.objects.select_related("company").all()
     serializer_class = ItemSerializer
     pagination_class = ItemPagination
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, NaturalOrderingFilter]
     filterset_class = ItemFilter
     search_fields = ["name", "part_number", "description", "company__name"]
     ordering_fields = ["name", "quantity", "created_at", "purchase_price", "selling_price"]
